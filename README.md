@@ -28,6 +28,7 @@ By default it will read all '.txt' files in the directory (non-recursive) from w
 It will also output a '.dat' file which is the serialized function, which by default will be written to the directory from which it is run.
 
 These parameters can be changed on the command line also, by passing the parameters 'input-directory' and 'output-directory', .e.g:
+
 `java -jar -Dinput-directory=some/different/directory -Doutput-directory=yet/another/directory path/to/gov3-poc-1.0.0-SNAPSHOT.jar`
 
 ## Data Format
