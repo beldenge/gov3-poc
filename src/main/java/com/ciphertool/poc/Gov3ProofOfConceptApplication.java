@@ -1,21 +1,39 @@
 package com.ciphertool.poc;
 
-import it.unimi.dsi.bits.TransformationStrategies;
-import it.unimi.dsi.fastutil.longs.LongArrayList;
+import it.unimi.dsi.fastutil.objects.AbstractObject2LongFunction;
 import it.unimi.dsi.sux4j.mph.GOV3Function;
+import it.unimi.dsi.sux4j.mph.GOV4Function;
+import it.unimi.dsi.sux4j.mph.TwoStepsGOV3Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.util.ReflectionUtils;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.lang.reflect.Field;
 
 @SpringBootApplication
 public class Gov3ProofOfConceptApplication implements CommandLineRunner {
     private static Logger LOG = LoggerFactory.getLogger(Gov3ProofOfConceptApplication.class);
+
+    @Value("${function-type}")
+    private FunctionType functionType;
+
+    @Value("${input-directory}")
+    private String inputDirectory;
+
+    @Value("${output-directory}")
+    private String outputDirectory;
+
+    @Autowired
+    private DataImporter dataImporter;
+
+    @Autowired
+    private FunctionGenerator functionGenerator;
 
     public static void main(String[] args) {
         SpringApplication.run(Gov3ProofOfConceptApplication.class, args);
@@ -23,27 +41,32 @@ public class Gov3ProofOfConceptApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws IOException {
-//        TH 233
-//        HE 229
-//        IN 228
-        List<byte[]> keys = new ArrayList<>();
-        keys.add("TH".getBytes());
-        keys.add("HE".getBytes());
-        keys.add("IN".getBytes());
+        FunctionData functionData = dataImporter.importData(inputDirectory);
 
-        LongArrayList values = new LongArrayList();
-        values.add(233);
-        values.add(229);
-        values.add(228);
+        AbstractObject2LongFunction function = functionGenerator.generate(functionType, functionData.getKeys(), functionData.getValues());
 
-        GOV3Function gov3Function = new GOV3Function.Builder<byte[]>()
-                .transform(TransformationStrategies.byteArray())
-                .keys(keys)
-                .values(values)
-                .build();
+        dumpFunction(function);
+    }
 
-        LOG.info("Value: {}", gov3Function.getLong("TH".getBytes()));
-        LOG.info("Value: {}", gov3Function.getLong("HE".getBytes()));
-        LOG.info("Value: {}", gov3Function.getLong("IN".getBytes()));
+    private void dumpFunction(AbstractObject2LongFunction function) throws IOException {
+        if (function instanceof GOV3Function) {
+            ((GOV3Function) function).dump(outputDirectory + "/GOV3Function.dat");
+        } else if (function instanceof TwoStepsGOV3Function) {
+            TwoStepsGOV3Function twoStepsGOV3Function = ((TwoStepsGOV3Function) function);
+
+            Field firstFunctionField = ReflectionUtils.findField(TwoStepsGOV3Function.class, "firstFunction");
+            GOV3Function firstFunction = (GOV3Function) ReflectionUtils.getField(firstFunctionField, twoStepsGOV3Function);
+
+            if (firstFunction != null) {
+                firstFunction.dump(outputDirectory + "/TwoStepsGOV3Function-first.dat");
+            }
+
+            Field secondFunctionField = ReflectionUtils.findField(TwoStepsGOV3Function.class, "secondFunction");
+            GOV3Function secondFunction = (GOV3Function) ReflectionUtils.getField(secondFunctionField, twoStepsGOV3Function);
+
+            secondFunction.dump(outputDirectory + "/TwoStepsGOV3Function-second.dat");
+        } else if (function instanceof GOV4Function) {
+            ((GOV4Function) function).dump(outputDirectory + "/GOV4Function.dat");
+        }
     }
 }
