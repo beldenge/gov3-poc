@@ -35,3 +35,9 @@ These parameters can be changed on the command line also, by passing the paramet
 The input files are expected to be space-delimited with the ngram as the first element and the count as the second element.
 
 An example file is provided in the src/test/resources directory of this repository.
+
+## Performance tuning
+
+As it is run as a Java application, you can supply more memory with the "-Xms" and "-Xmx" parameters as well.  For example to give it a min and max of 8GB, you can do the following:
+
+`java -jar -Xms8G -Xmx8G path/to/gov3-poc-1.0.0-SNAPSHOT.jar`
