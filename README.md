@@ -12,11 +12,11 @@ It requires Java 9 or greater, as that's what the latest version of Sux4j is com
 ## Running
 You can run it with the command:
 
-`java -jar path/to/gov3-poc-1.0.0.jar`
+`java -jar path/to/gov3-poc-1.0.1-SNAPSHOT.jar`
 
 By default it generates a GOV3Function implementation.  It also supports TwoStepsGOV3Function and GOV4Function.  This can be toggled by passing the parameter 'function-type' as follows:
 
-`java -jar -Dfunction-type=GOV4 path/to/gov3-poc-1.0.0.jar`
+`java -jar -Dfunction-type=GOV4 path/to/gov3-poc-1.0.1-SNAPSHOT.jar`
 
 Function Type | Parameter Value
 --- | ---
@@ -29,7 +29,7 @@ It will also output a '.dat' file which is the serialized function, which by def
 
 These parameters can be changed on the command line also, by passing the parameters 'input-directory' and 'output-directory', .e.g:
 
-`java -jar -Dinput-directory=some/different/directory -Doutput-directory=yet/another/directory path/to/gov3-poc-1.0.0.jar`
+`java -jar -Dinput-directory=some/different/directory -Doutput-directory=yet/another/directory path/to/gov3-poc-1.0.1-SNAPSHOT.jar`
 
 ## Data Format
 The input files are expected to be space-delimited with the ngram as the first element and the count as the second element.
@@ -40,4 +40,4 @@ An example file is provided in the src/test/resources directory of this reposito
 
 As it is run as a Java application, you can supply more memory with the "-Xms" and "-Xmx" parameters as well.  For example to give it a min and max of 8GB, you can do the following:
 
-`java -jar -Xms8G -Xmx8G path/to/gov3-poc-1.0.0.jar`
+`java -jar -Xms8G -Xmx8G path/to/gov3-poc-1.0.1-SNAPSHOT.jar`
