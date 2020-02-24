@@ -1,11 +1,7 @@
 package com.ciphertool.poc;
 
 import it.unimi.dsi.fastutil.objects.AbstractObject2LongFunction;
-import it.unimi.dsi.sux4j.mph.GOV3Function;
-import it.unimi.dsi.sux4j.mph.GOV4Function;
-import it.unimi.dsi.sux4j.mph.TwoStepsGOV3Function;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import it.unimi.dsi.sux4j.mph.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -18,10 +14,14 @@ import java.lang.reflect.Field;
 
 @SpringBootApplication
 public class Gov3ProofOfConceptApplication implements CommandLineRunner {
-    private static Logger LOG = LoggerFactory.getLogger(Gov3ProofOfConceptApplication.class);
-
     @Value("${function-type}")
     private FunctionType functionType;
+
+    @Value("${compact:false}")
+    private boolean compact;
+
+    @Value("${key-length}")
+    private int keyLength;
 
     @Value("${input-directory}")
     private String inputDirectory;
@@ -41,20 +41,22 @@ public class Gov3ProofOfConceptApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws IOException {
-        FunctionData functionData = dataImporter.importData(inputDirectory);
+        FunctionData functionData = dataImporter.importData(inputDirectory, keyLength);
 
-        AbstractObject2LongFunction function = functionGenerator.generate(functionType, functionData.getKeys(), functionData.getValues());
+        AbstractObject2LongFunction function = functionGenerator.generate(functionType, functionData.getKeys(), functionData.getValues(), compact);
 
         dumpFunction(function);
     }
 
     private void dumpFunction(AbstractObject2LongFunction function) throws IOException {
+        // We have to check instanceof for each supported function because the dump() method doesn't seem to be exposed on any interface or parent class
         if (function instanceof GOV3Function) {
             ((GOV3Function) function).dump(outputDirectory + "/GOV3Function.dat");
         } else if (function instanceof TwoStepsGOV3Function) {
             TwoStepsGOV3Function twoStepsGOV3Function = ((TwoStepsGOV3Function) function);
 
             Field firstFunctionField = ReflectionUtils.findField(TwoStepsGOV3Function.class, "firstFunction");
+            ReflectionUtils.makeAccessible(firstFunctionField);
             GOV3Function firstFunction = (GOV3Function) ReflectionUtils.getField(firstFunctionField, twoStepsGOV3Function);
 
             if (firstFunction != null) {
@@ -62,11 +64,18 @@ public class Gov3ProofOfConceptApplication implements CommandLineRunner {
             }
 
             Field secondFunctionField = ReflectionUtils.findField(TwoStepsGOV3Function.class, "secondFunction");
+            ReflectionUtils.makeAccessible(secondFunctionField);
             GOV3Function secondFunction = (GOV3Function) ReflectionUtils.getField(secondFunctionField, twoStepsGOV3Function);
 
-            secondFunction.dump(outputDirectory + "/TwoStepsGOV3Function-second.dat");
+            if (secondFunction != null) {
+                secondFunction.dump(outputDirectory + "/TwoStepsGOV3Function-second.dat");
+            }
         } else if (function instanceof GOV4Function) {
             ((GOV4Function) function).dump(outputDirectory + "/GOV4Function.dat");
+        } else if (function instanceof GV3CompressedFunction) {
+            ((GV3CompressedFunction) function).dump(outputDirectory + "/GV3CompressedFunction.dat");
+        } else if (function instanceof GV4CompressedFunction) {
+            ((GV4CompressedFunction) function).dump(outputDirectory + "/GV4CompressedFunction.dat");
         }
     }
 }

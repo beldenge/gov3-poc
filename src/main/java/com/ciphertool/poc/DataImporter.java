@@ -18,9 +18,8 @@ import java.util.List;
 public class DataImporter {
     private static Logger log = LoggerFactory.getLogger(DataImporter.class);
     private static final String EXTENSION = ".txt";
-    private static final String DELIMITER =  " ";
 
-    public FunctionData importData(String inputDirectory) throws IOException {
+    public FunctionData importData(String inputDirectory, int keyLength) throws IOException {
         Path inputDirectoryPath = Paths.get(inputDirectory);
 
         if (!Files.exists(inputDirectoryPath)) {
@@ -29,6 +28,21 @@ public class DataImporter {
 
         if (!Files.isDirectory(inputDirectoryPath)) {
             throw new IllegalArgumentException("Input directory must be a directory.");
+        }
+
+        long matchingFileCount = Files.find(inputDirectoryPath, 1, (path, basicFileAttributes) -> {
+            String filename = path.toString();
+            String ext = filename.substring(filename.lastIndexOf('.'));
+
+            if (basicFileAttributes.isRegularFile() && ext.equals(EXTENSION)) {
+                return true;
+            }
+
+            return false;
+        }).count();
+
+        if (matchingFileCount == 0) {
+            throw new IllegalStateException("No files of type " + EXTENSION + " found.");
         }
 
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(inputDirectoryPath)) {
@@ -51,14 +65,12 @@ public class DataImporter {
 
                 try(BufferedReader bufferedReader = Files.newBufferedReader(entry)) {
                     bufferedReader.lines().forEach(line -> {
-                        String[] parts = line.split(DELIMITER);
-
-                        if (parts.length != 2) {
-                            throw new IllegalStateException("Expected line to have two parts, but file " + entry.toString() + " contains a line with " + parts.length + " parts.");
+                        if (line.length() < (keyLength + 1)) {
+                            throw new IllegalStateException("Expected line to have at least " + (keyLength + 1) + " characters, but only found " + line.length() + ".");
                         }
 
-                        keys.add(parts[0].getBytes());
-                        values.add(Long.parseLong(parts[1]));
+                        keys.add(line.substring(0, keyLength).trim().getBytes());
+                        values.add(Long.parseLong(line.substring(keyLength).trim()));
                     });
                 }
             }
