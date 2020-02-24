@@ -27,6 +27,7 @@ GV3CompressedFunction | GV3_COMPRESSED
 GV4CompressedFunction | GV4_COMPRESSED
 
 The GOV3Function also supports a compacted option, which can be specified as follows.  It defaults to false, and it will simply be ignored for any other function type.
+
 `java -jar -Dkey-length=3 -Dfunction-type=GOV3 -Dcompacted=true path/to/gov3-poc-1.1.1-SNAPSHOT.jar`
 
 By default it will read all '.txt' files in the directory (non-recursive) from which it is run.
@@ -48,4 +49,5 @@ As it is run as a Java application, you can supply more memory with the "-Xms" a
 `java -jar -Xms8G -Xmx8G path/to/gov3-poc-1.1.1-SNAPSHOT.jar`
 
 According to the Sux4j [documentation](http://sux.di.unimi.it/docs/it/unimi/dsi/sux4j/mph/GOV3Function.html), by default the function generators will use no more than 4 threads.  To increase the number of threads, pass the 'it.unimi.dsi.sux4j.mph.threads' parameter on the command-line as follows:
+
 `java -jar -Dit.unimi.dsi.sux4j.mph.threads=8 path/to/gov3-poc-1.1.1-SNAPSHOT.jar`
