@@ -38,7 +38,7 @@ These parameters can be changed on the command line also, by passing the paramet
 `java -jar -Dinput-directory=some/different/directory -Doutput-directory=yet/another/directory path/to/gov3-poc-1.1.1-SNAPSHOT.jar`
 
 ## Data Format
-The input files are expected to be space-delimited with the ngram as the first element and the count as the second element.
+The input files are expected to be fixed-width with the ngram as the first n characters and the count as everything following the key-length option.
 
 An example file is provided in the src/test/resources directory of this repository.
 
