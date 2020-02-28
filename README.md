@@ -35,7 +35,11 @@ It will also output a '.dat' file which is the serialized function, which by def
 
 These parameters can be changed on the command line also, by passing the parameters 'input-directory' and 'output-directory', .e.g:
 
-`java -jar -Dinput-directory=some/different/directory -Doutput-directory=yet/another/directory path/to/gov3-poc-1.1.1-SNAPSHOT.jar`
+`java -jar -Dinput-directory=some/different/directory -Doutput-directory=yet/another/directory -Dkey-length=3 -Dfunction-type=GOV3 path/to/gov3-poc-1.1.1-SNAPSHOT.jar`
+
+Finally there is an option 'output-width' to constrain the bit width of the output of the function, which must be enough to represent all values contained in the store.  It is currently only supported by the GOV3Function and GOV4Function.
+
+`java -jar -Doutput-width=8 -Dkey-length=3 -Dfunction-type=GOV3 path/to/gov3-poc-1.1.1-SNAPSHOT.jar`
 
 ## Data Format
 The input files are expected to be fixed-width with the ngram as the first n characters and the count as everything following the key-length option.
@@ -43,11 +47,22 @@ The input files are expected to be fixed-width with the ngram as the first n cha
 An example file is provided in the src/test/resources directory of this repository.
 
 ## Performance tuning
+The following JVM  option has been shown to provide a non-trivial speed increase.
+-XX:+UseTransparentHugePages
 
+#### Memory
 As it is run as a Java application, you can supply more memory with the "-Xms" and "-Xmx" parameters as well.  For example to give it a min and max of 8GB, you can do the following:
 
-`java -jar -Xms8G -Xmx8G path/to/gov3-poc-1.1.1-SNAPSHOT.jar`
+`java -jar -Xms8G -Xmx8G -Dkey-length=3 -Dfunction-type=GOV3 path/to/gov3-poc-1.1.1-SNAPSHOT.jar`
 
+Another option is to specify a percentage of available memory to use:
+
+`java -jar -XX:InitialRAMPercentage=90.0 -XX:MinRAMPercentage=90.0 -XX:MaxRAMPercentage=90.0 -Dkey-length=3 -Dfunction-type=GOV3 path/to/gov3-poc-1.1.1-SNAPSHOT.jar`
+
+There are plenty of other JVM tuning options, but as this is not a Java tutorial, please reference the following documentation for more information:
+https://www.oracle.com/technetwork/java/javase/tech/vmoptions-jsp-140102.html
+
+#### Multi-threading
 According to the Sux4j [documentation](http://sux.di.unimi.it/docs/it/unimi/dsi/sux4j/mph/GOV3Function.html), by default the function generators will use no more than 4 threads.  To increase the number of threads, pass the 'it.unimi.dsi.sux4j.mph.threads' parameter on the command-line as follows:
 
-`java -jar -Dit.unimi.dsi.sux4j.mph.threads=8 path/to/gov3-poc-1.1.1-SNAPSHOT.jar`
+`java -jar -Dit.unimi.dsi.sux4j.mph.threads=8 -Dkey-length=3 -Dfunction-type=GOV3 path/to/gov3-poc-1.1.1-SNAPSHOT.jar`

@@ -1,6 +1,6 @@
 package com.ciphertool.poc;
 
-import it.unimi.dsi.fastutil.longs.LongArrayList;
+import it.unimi.dsi.fastutil.longs.LongBigArrayBigList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -11,7 +11,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 @Component
@@ -46,8 +46,8 @@ public class DataImporter {
         }
 
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(inputDirectoryPath)) {
-            List<byte[]> keys = new ArrayList<>();
-            LongArrayList values = new LongArrayList();
+            List<byte[]> keys = new LinkedList<>();
+            LongBigArrayBigList values = new LongBigArrayBigList();
 
             for (Path entry : stream) {
                 if (Files.isDirectory(entry)) {

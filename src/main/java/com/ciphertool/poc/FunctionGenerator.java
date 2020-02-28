@@ -2,7 +2,6 @@ package com.ciphertool.poc;
 
 import it.unimi.dsi.bits.TransformationStrategies;
 import it.unimi.dsi.bits.TransformationStrategy;
-import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongBigArrayBigList;
 import it.unimi.dsi.fastutil.objects.AbstractObject2LongFunction;
 import it.unimi.dsi.sux4j.mph.*;
@@ -15,13 +14,13 @@ import java.util.List;
 public class FunctionGenerator {
     private static final TransformationStrategy TRANSFORMATION_STRATEGY = TransformationStrategies.byteArray();
 
-    public AbstractObject2LongFunction generate(FunctionType functionType, List<byte[]> keys, LongArrayList values, boolean compact) throws IOException {
+    public AbstractObject2LongFunction generate(FunctionType functionType, List<byte[]> keys, LongBigArrayBigList values, boolean compact, int outputWidth) throws IOException {
         switch (functionType) {
             case GOV3:
                 GOV3Function.Builder<byte[]> builder = new GOV3Function.Builder<>()
                         .transform(TRANSFORMATION_STRATEGY)
                         .keys(keys)
-                        .values(values);
+                        .values(values, outputWidth);
 
                 if (compact) {
                     builder = builder.compacted();
@@ -38,7 +37,7 @@ public class FunctionGenerator {
                 return new GOV4Function.Builder<byte[]>()
                         .transform(TRANSFORMATION_STRATEGY)
                         .keys(keys)
-                        .values(values)
+                        .values(values, outputWidth)
                         .build();
             case GV3_COMPRESSED:
                 return new GV3CompressedFunction.Builder<byte[]>()
